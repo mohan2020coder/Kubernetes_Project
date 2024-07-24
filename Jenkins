@@ -1,0 +1,25 @@
+stage('Git Checkout'){
+  git 'https://github.com/mohan2020coder/Kubernetes_Project.git';
+}
+stage('Sending Docker File to Ansible Server Over SSH'){
+    sshagent(['ansible_demo']){
+        sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104'
+        sh 'scp /var/lib/jenkins/workspace/pipeline-demo/* ubuntu@192.168.0.104:/home/moni'
+  }
+}
+stage('Docker Build Image'){
+    sshagent(['ansible_demo']){
+        sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 cd /home/moni'
+        sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 docker image build -t $JOB_NAME:v1.$BUILD_ID .'
+  }
+}
+
+stage('Docker Image Tagging'){
+    sshagent(['ansible_demo']){
+        sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 cd /home/moni'
+        sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 docker image tag $JOB_NAME:v1.$BUILD_ID monihub/$JOB_NAME:v1.$BUILD_ID'
+        sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 docker image tag $JOB_NAME:v1.$BUILD_ID monihub/$JOB_NAME:latest'
+  }
+}
+
+
