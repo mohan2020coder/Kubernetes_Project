@@ -21,5 +21,15 @@ stage('Docker Image Tagging'){
         sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 docker image tag $JOB_NAME:v1.$BUILD_ID monihub/$JOB_NAME:latest'
   }
 }
+stage('Push the Image to Docker Hub'){
+    sshagent(['ansible_demo']){
+        withCredentials([string(credentialsId: 'dockerhub_password', variable: 'dockerhub_passwd;)]){
+        sh "docker login -u monihub -p ${dockerhub_password}"
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 cd /home/moni'
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 docker image push monihub/$JOB_NAME:v1.$BUILD_ID'
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 docker image push monihub/$JOB_NAME:latest'
+    }
 
+  }
+}
 
