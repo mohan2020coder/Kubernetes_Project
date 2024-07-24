@@ -28,8 +28,24 @@ stage('Push the Image to Docker Hub'){
           sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 cd /home/moni'
           sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 docker image push monihub/$JOB_NAME:v1.$BUILD_ID'
           sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 docker image push monihub/$JOB_NAME:latest'
-    }
 
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 docker image rm monihub/$JOB_NAME:v1.$BUILD_ID monihub/$JOB_NAME:latest $JOB_NAME:v1.$BUILD_ID  '
+          
+    }
+  }
+}
+
+stage('Copy files from ansible to kubernetes'){
+    sshagent(['kubernetes_server']){
+        sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.105 cd /home/moni'
+        sh 'scp /var/lib/jenkins/workspace/pipeline-demo/* ubuntu@192.168.0.105:/home/moni'
+  }
+}
+
+stage( 'kubernetes Depolyment'){
+    sshagent(['ansible_demo']){
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 cd /home/moni'
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@192.168.0.104 ansible-playbook ansible.yml'
   }
 }
 
