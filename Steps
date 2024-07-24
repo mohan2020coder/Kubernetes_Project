@@ -1,0 +1,38 @@
+ec2 - Kubernetes instance
+-----------------------------
+passwd root
+1234
+1234
+
+vi /etc/ssh/sshd_config
+--------------
+PermitRootLogin yes
+PasswordAuthentication yes
+----------------
+save and exit
+
+service sshd restart
+
+
+ec2 - Ansible instance
+---------------------
+ssh-keygen ssh-copy-id -i root@192.168.0.105
+
+yes
+
+1234
+
+vi /etc/ansible/hosts
+-------------
+[node]
+192.168.0.104
+
+--------------------
+save and exit
+
+
+ansible -m ping node
+
+
+
+
